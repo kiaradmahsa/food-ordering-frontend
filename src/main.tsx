@@ -11,7 +11,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <Auth0ProviderWithNavigate>
           <AppRoutes />
       </Auth0ProviderWithNavigate>
-      <AppRoutes></AppRoutes>
     </Router>
   </React.StrictMode>
 );
