@@ -12,9 +12,11 @@ const auth0ProviderWithNavigate = ({children}: Props) => {
   if(!domain || !clientId || !redirectUri){
     throw new Error("unable to initialize auth");
   }
+
   const onRedirectCallback = (appState?: AppState , user?: User)=>{
     console.log("USER", user);
   }
+  
   return (
     <Auth0Provider 
         domain={domain} 
