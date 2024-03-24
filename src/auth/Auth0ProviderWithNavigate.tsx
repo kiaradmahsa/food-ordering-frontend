@@ -5,8 +5,9 @@ type Props = {
   children: React.ReactNode;
 };
 
-const auth0ProviderWithNavigate = ({children}: Props) => {
+const Auth0ProviderWithNavigate = ({ children }: Props) => {
   const navigate = useNavigate();
+
   const domain = import.meta.env.VITE_AUTH0_DOAMIN;
   const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
   const redirectUri = import.meta.env.VITE_AUTH0_CALLBACK_URL;
@@ -36,8 +37,8 @@ const auth0ProviderWithNavigate = ({children}: Props) => {
   )
 }
 
-export default auth0ProviderWithNavigate;
+export default Auth0ProviderWithNavigate;
 
-function getAccessTokenSilently() {
-  throw new Error("Function not implemented.");
-}
+// function getAccessTokenSilently() {
+//   throw new Error("Function not implemented.");
+// }
