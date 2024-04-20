@@ -3,12 +3,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import DetailsSection from "./DetailsSection";
-import { Separator } from "@radix-ui/react-separator";
+import { Separator } from "@/components/ui/separator";
 import CuisinesSection from "./CuisinesSection";
 import MenuSection from "./MenuSection";
 import ImageSection from "./ImageSection";
-import { Button } from "@/components/ui/button";
 import LoadingButton from "@/components/LoadingButton";
+import { Button } from "@/components/ui/button";
+import { Restaurant } from "@/types";
+import { useEffect } from "react";
+
 
 const formSchema = z
     .object({
@@ -49,42 +52,97 @@ const formSchema = z
 type RestaurantFormData = z.infer<typeof formSchema>;
 
 type Props = {
+    restaurant?: Restaurant;
     onSave: (restaurantFormData: FormData) => void;
     isLoading: boolean;
-}
+  };
 
 
-const ManageRestaurantForm = ({ onSave, isLoading }: Props) => {
+  const ManageRestaurantForm = ({ onSave, isLoading, restaurant }: Props) => {
     const form = useForm<RestaurantFormData>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-        cuisines: [],
-        menuItems: [{ name: "", price: 0 }],
+          cuisines: [],
+          menuItems: [{ name: "", price: 0 }],
         },
-    });
+      });
 
-
-
-    const onSubmit = (formDataJson: RestaurantFormData) => {
-        //TODO - convert formDataJson to a new FormData object
+useEffect(() => {
+    if(!restaurant){
+        return;
     }
 
-    return (
-        <Form {...form}>
-            <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-8 bg-gray-50 p-10 rounded-lg">
-                <DetailsSection />
-                <Separator />
-                <CuisinesSection/>
-                <Separator />
-                <MenuSection />
-                <Separator />
-                <ImageSection />
-            </form>
-            { isLoading ? <LoadingButton /> : <Button type="submit">Submit</Button>}
-        </Form>
-    )
+    const deliveryPriceFormatted = parseInt(
+        (restaurant.deliveryPrice / 100).toFixed(2)
+      );
+
+    const menuItemsFormatted = restaurant.menuItems.map((item) => ({
+        ...item,
+        price: parseInt((item.price / 100).toFixed(2)),
+      }));
+
+      const updatedRestaurant = {
+        ...restaurant,
+        deliveryPrice: deliveryPriceFormatted,
+        menuItems: menuItemsFormatted,
+      };
+
+      form.reset(updatedRestaurant);
+}, [form, restaurant]);
+
+const onSubmit = (formDataJson: RestaurantFormData) => {
+    const formData = new FormData();
+
+    formData.append("restaurantName", formDataJson.restaurantName);
+    formData.append("city", formDataJson.city);
+    formData.append("country", formDataJson.country);
+
+    //1GBP = 100 pence - 1.50GBP = 150pence => lowest denomination
+    formData.append(
+        "deliveryPrice",
+        (formDataJson.deliveryPrice * 100).toString()
+    );
+
+    formData.append(
+        "estimatedDeliveryTime",
+        formDataJson.estimatedDeliveryTime.toString()
+    );
+
+    formDataJson.cuisines.forEach((cuisine, index) => {
+        formData.append(`cuisines[${index}]`, cuisine);
+        });
+
+    formDataJson.menuItems.forEach((menuItem, index) => {
+    formData.append(`menuItems[${index}][name]`, menuItem.name);
+    formData.append(
+        `menuItems[${index}][price]`,
+        (menuItem.price * 100).toString()
+    );
+    });
+
+    
+    formData.append(`imageFile`, formDataJson.imageFile);
+
+    
+    onSave(formData);
+}
+
+return (
+    <Form {...form}>
+        <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-8 bg-gray-50 p-10 rounded-lg">
+            <DetailsSection />
+            <Separator />
+            <CuisinesSection />
+            <Separator />
+            <MenuSection />
+            <Separator />
+            <ImageSection />
+            {isLoading ? <LoadingButton /> : <Button type="submit">Submit</Button>}
+        </form>
+    </Form>
+)
 };
 
 export default ManageRestaurantForm;
