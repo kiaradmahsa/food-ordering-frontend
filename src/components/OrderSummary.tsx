@@ -35,7 +35,7 @@ type Props = {
                 {cartItems.map((item) => (
                     <div className="flex justify-between">
                         <span>
-                            <Badge variant="outline" className="mr-2">
+                            <Badge className="mr-2 outline-style">
                                 {item.quantity}
                             </Badge>
                             {item.name}
